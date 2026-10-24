@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Your Cart | Rajlaxmi Jewellers</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header id="site-header"></header>
+
+  <main class="container narrow" id="cart"></main>
+
+  <div id="site-footer"></div>
+
+  <script src="js/data.js"></script>
+  <script src="js/app.js"></script>
+  <script>
+    function render() {
+      const items = Cart.items();
+      if (!items.length) {
+        $("#cart").innerHTML = `<div class="cart-head"><h1>Your Cart</h1></div>
+          <div class="empty" style="margin-bottom:56px"><h3>Your cart is empty</h3><p class="muted">Explore our collections and add something beautiful.</p><br>
+          <a href="category.html" class="btn btn-primary">Shop Collection</a></div>`;
+        return;
+      }
+      const n = Cart.count();
+      $("#cart").innerHTML = `
+        <div class="cart-head"><h1>Your Cart <small>(${n} item${n > 1 ? "s" : ""})</small></h1><button id="clear">Clear Cart</button></div>
+        ${items.map((it, i) => { const p = findProduct(it.id);
+          return `<div class="citem ${it.selected === false ? "off" : ""}">
+            <input type="checkbox" data-sel="${i}" ${it.selected === false ? "" : "checked"} aria-label="Include ${p.name}">
+            <a href="product.html?id=${p.id}" class="thumb"><img src="${p.img}" alt="${p.name}"></a>
+            <div>
+              <h4>${p.name}</h4>
+              <small>${itemSpec(it, p)}</small><br>
+              <div class="qty sm"><button data-q="${i}" data-d="-1" aria-label="Decrease">−</button><input value="${it.qty}" readonly aria-label="Quantity"><button data-q="${i}" data-d="1" aria-label="Increase">+</button></div>
+            </div>
+            <div class="right"><button class="x" data-r="${i}" aria-label="Remove ${p.name}">${icon("close")}</button><b>${inr(linePrice(it))}</b></div>
+          </div>`; }).join("")}
+        <div class="price-box">
+          <h3>Price Details</h3>
+          ${priceLines()}
+          <a href="checkout.html" class="btn btn-primary btn-block" id="toCheckout">Proceed to Checkout</a>
+        </div>`;
+    }
+
+    $("#cart").addEventListener("click", (e) => {
+      const q = e.target.closest("[data-q]"), r = e.target.closest("[data-r]");
+      if (q) { const i = +q.dataset.q; Cart.update(i, { qty: Math.max(1, Math.min(10, Cart.items()[i].qty + +q.dataset.d)) }); render(); }
+      if (r) { Cart.remove(+r.dataset.r); render(); }
+      if (e.target.id === "clear" && confirm("Remove all items from your cart?")) { Cart.clear(); render(); }
+      if (e.target.id === "toCheckout" && !Cart.selected().length) { e.preventDefault(); toast("Select at least one item"); }
+    });
+    $("#cart").addEventListener("change", (e) => {
+      const s = e.target.closest("[data-sel]");
+      if (s) { Cart.update(+s.dataset.sel, { selected: s.checked }); render(); }
+    });
+    render();
+  </script>
+</body>
+</html>

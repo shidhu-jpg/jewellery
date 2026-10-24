@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Collections | Rajlaxmi Jewellers</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header id="site-header"></header>
+
+  <main class="container">
+    <div class="crumbs"><a href="index.html">Home</a> <span>›</span> <b id="crumb">Gold Jewellery</b></div>
+
+    <div class="shop">
+      <aside class="filters" id="filters">
+        <div class="fgroup"><h4>Categories</h4><div class="fcats" id="fCats"></div></div>
+
+        <div class="fgroup">
+          <h4>Price Range</h4>
+          <div class="range">
+            <div class="track"></div><div class="fill" id="fill"></div>
+            <input type="range" id="pMin" min="0" max="500000" step="5000" value="0" aria-label="Minimum price">
+            <input type="range" id="pMax" min="0" max="500000" step="5000" value="500000" aria-label="Maximum price">
+          </div>
+          <div class="range-vals" id="pVals"></div>
+        </div>
+
+        <div class="fgroup"><h4>Material</h4><div id="fMat"></div></div>
+
+        <div class="fgroup">
+          <h4>Occasion</h4>
+          <label><input type="checkbox" name="occ" value="daily"> Daily Wear</label>
+          <label><input type="checkbox" name="occ" value="wedding"> Wedding</label>
+          <label><input type="checkbox" name="occ" value="party"> Party</label>
+          <label><input type="checkbox" name="occ" value="gift"> Gift</label>
+        </div>
+
+        <div class="fgroup">
+          <h4>Sort By</h4>
+          <select class="select" id="sort2" aria-label="Sort by" style="width:100%">
+            <option value="latest">Latest First</option>
+            <option value="popular">Popular</option>
+            <option value="low">Price: Low to High</option>
+            <option value="high">Price: High to Low</option>
+          </select>
+        </div>
+      </aside>
+
+      <div>
+        <div class="shop-head">
+          <div><h1 id="title">Gold Jewellery</h1><p id="count"></p></div>
+          <div style="display:flex;gap:10px;align-items:center">
+            <button class="btn btn-soft btn-sm filter-toggle" id="fToggle">Filters</button>
+            <label>Sort By
+              <select class="select" id="sort" aria-label="Sort by">
+                <option value="popular">Popular</option>
+                <option value="latest">Latest First</option>
+                <option value="low">Price: Low to High</option>
+                <option value="high">Price: High to Low</option>
+              </select>
+            </label>
+          </div>
+        </div>
+        <div class="pgrid cols-3" id="grid"></div>
+      </div>
+    </div>
+  </main>
+
+  <div id="site-footer"></div>
+
+  <script src="js/data.js"></script>
+  <script src="js/app.js"></script>
+  <script>
+    const cat = qs("cat") || (qs("q") ? null : "gold");
+    const q = (qs("q") || "").trim().toLowerCase();
+    const c = CATEGORIES.find((x) => x.id === cat);
+    const title = q ? `Results for “${qs("q")}”` : c ? c.name : "All Jewellery";
+    $("#title").textContent = $("#crumb").textContent = title;
+    document.title = `${title} | ${STORE.name}`;
+
+    $("#fCats").innerHTML = CATEGORIES.map((x) => `<a href="category.html?cat=${x.id}" class="${x.id === cat ? "active" : ""}">${x.name}</a>`).join("");
+    $("#fMat").innerHTML = ["18K", "22K", "24K", "Diamond", "Silver"].map((m) =>
+      `<label><input type="checkbox" name="mat" value="${m}"> ${MATERIAL_LABEL[m]}</label>`).join("");
+
+    const pMin = $("#pMin"), pMax = $("#pMax");
+    function render() {
+      if (+pMin.value > +pMax.value) [pMin.value, pMax.value] = [pMax.value, pMin.value];
+      const lo = +pMin.value, hi = +pMax.value;
+      $("#fill").style.cssText = `left:${(lo / 500000) * 100}%;right:${100 - (hi / 500000) * 100}%`;
+      $("#pVals").textContent = `${inr(lo)} – ${inr(hi)}`;
+      const mats = $$("input[name=mat]:checked").map((i) => i.value);
+      const occ = $$("input[name=occ]:checked").map((i) => i.value);
+      const list = PRODUCTS.filter((p) =>
+        (q ? (p.name + " " + p.cat).toLowerCase().includes(q) : p.cat === cat) &&
+        p.price >= lo && p.price <= hi &&
+        (!mats.length || mats.includes(p.material)) &&
+        (!occ.length || occ.some((o) => p.occasion.includes(o))));
+      const s = $("#sort").value;
+      list.sort({ popular: (a, b) => a.id - b.id, latest: (a, b) => b.id - a.id, low: (a, b) => a.price - b.price, high: (a, b) => b.price - a.price }[s]);
+      $("#count").textContent = list.length ? `Showing 1–${list.length} of ${list.length} products` : "No products found";
+      $("#grid").innerHTML = list.length ? list.map((p) => productCard(p)).join("")
+        : `<div class="empty" style="grid-column:1/-1"><h3>No products match</h3><p class="muted">Try clearing a filter or widening the price range.</p></div>`;
+    }
+
+    $("#filters").addEventListener("input", (e) => { if (e.target.id === "sort2") $("#sort").value = e.target.value; render(); });
+    $("#sort").addEventListener("change", (e) => { $("#sort2").value = e.target.value; render(); });
+    $("#fToggle").onclick = () => $("#filters").classList.toggle("open");
+    render();
+  </script>
+</body>
+</html>

@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>My Account | Rajlaxmi Jewellers</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header id="site-header"></header>
+
+  <main class="container">
+    <div class="acct">
+      <aside class="acct-side"><h3>My Account</h3><nav id="side"></nav></aside>
+
+      <div>
+        <div class="acct-pane" id="dashboard">
+          <h1>Dashboard</h1>
+          <p class="muted" style="margin-bottom:18px" id="hello"></p>
+          <div class="stat-grid" id="stats"></div>
+        </div>
+
+        <div class="acct-pane" id="orders"><h1>My Orders</h1><div id="orderList"></div></div>
+
+        <div class="acct-pane" id="wishlist"><h1>My Wishlist</h1><div class="pgrid cols-3" id="wishGrid"></div></div>
+
+        <div class="acct-pane" id="addresses"><h1>Addresses</h1><div class="panel" id="addrBox"></div></div>
+
+        <div class="acct-pane" id="profile">
+          <h1>Profile Details</h1>
+          <form class="panel" id="profForm">
+            <div class="form-2">
+              <div class="field"><label for="pName">Full Name</label><input id="pName"></div>
+              <div class="field"><label for="pPhone">Phone Number</label><input id="pPhone" maxlength="10" inputmode="numeric"></div>
+            </div>
+            <button class="btn btn-primary btn-sm">Save Changes</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <div id="site-footer"></div>
+
+  <script src="js/data.js"></script>
+  <script src="js/app.js"></script>
+  <script>
+    // Sample history so the page isn't empty in the demo — set to [] for the live store
+    const DEMO_ORDERS = [
+      { id: "RJ20261010", date: "2026-10-10", items: [{ id: 3, qty: 1 }], total: 78000, status: "Delivered", method: "UPI" },
+      { id: "RJ20260925", date: "2026-09-25", items: [{ id: 8, qty: 1 }], total: 45000, status: "Cancelled", method: "Card" },
+    ];
+    const orders = [...store.get("rj_orders", []), ...DEMO_ORDERS];
+    const addr = store.get("rj_addr", null);
+
+    const panes = [["dashboard", "home", "Dashboard"], ["orders", "bag", "My Orders"], ["wishlist", "heart", "My Wishlist"], ["addresses", "pin", "Addresses"], ["profile", "user", "Profile Details"]];
+    $("#side").innerHTML = panes.map(([k, i, t]) => `<a href="#${k}" data-k="${k}">${icon(i)}${t}</a>`).join("") +
+      `<a href="index.html" id="logout">${icon("logout")}Logout</a>`;
+    function show() {
+      const k = panes.some(([p]) => "#" + p === location.hash) ? location.hash.slice(1) : "orders";
+      $$(".acct-pane, #side a").forEach((x) => x.classList.remove("active"));
+      $("#" + k).classList.add("active");
+      $(`#side [data-k=${k}]`).classList.add("active");
+      if (k === "wishlist") renderWish();
+    }
+    addEventListener("hashchange", show);
+    $("#logout").onclick = () => { try { localStorage.removeItem("rj_addr"); } catch {} };
+
+    // Dashboard
+    $("#hello").textContent = `Welcome back${addr && addr.name ? ", " + addr.name.split(" ")[0] : ""}!`;
+    $("#stats").innerHTML = [[orders.length, "Total Orders"], [orders.filter((o) => o.status === "Processing").length, "In Progress"], [Wish.ids().length, "Wishlist Items"]]
+      .map(([n, l]) => `<div class="stat"><b>${n}</b><small>${l}</small></div>`).join("");
+
+    // Orders
+    $("#orderList").innerHTML = orders.length ? orders.map((o, i) => `
+      <div class="ocard">
+        <b>#${o.id}</b><span class="amt">${inr(o.total)}</span>
+        <span class="date">${fmtDate(o.date)}</span><span></span>
+        <span class="badge b-${o.status.toLowerCase()}">${o.status}</span>
+        <button class="view" data-o="${i}">View Details</button>
+        <div class="details" hidden>
+          ${o.items.map((it) => { const p = findProduct(it.id);
+            return `<div class="mini-item"><img src="${p.img}" alt=""><div>${p.name}${it.qty > 1 ? " × " + it.qty : ""}<br><small class="muted">${itemSpec(it, p)}</small></div></div>`; }).join("")}
+          <p class="muted" style="font-size:12.5px">Paid via ${o.method}${o.addr ? ` · Deliver to ${o.addr.city}, ${o.addr.state} ${o.addr.pin}` : ""}</p>
+        </div>
+      </div>`).join("") : `<div class="empty"><h3>No orders yet</h3><br><a href="category.html" class="btn btn-primary">Start Shopping</a></div>`;
+    $("#orderList").onclick = (e) => {
+      const b = e.target.closest("[data-o]"); if (!b) return;
+      const d = b.parentElement.querySelector(".details"); d.hidden = !d.hidden;
+      b.textContent = d.hidden ? "View Details" : "Hide Details";
+    };
+
+    // Wishlist
+    function renderWish() {
+      const ids = Wish.ids();
+      $("#wishGrid").innerHTML = ids.length ? ids.map((id) => productCard(findProduct(id))).join("")
+        : `<div class="empty" style="grid-column:1/-1"><h3>Your wishlist is empty</h3><p class="muted">Tap the ♡ on any product to save it here.</p></div>`;
+    }
+
+    // Addresses & profile
+    $("#addrBox").innerHTML = addr && addr.line
+      ? `<b style="font-weight:500">${addr.name}</b><p class="muted" style="margin:4px 0 14px">${addr.line}, ${addr.city}, ${addr.state} – ${addr.pin}<br>Phone: ${addr.phone}</p><a href="checkout.html" class="btn btn-soft btn-sm">Edit</a>`
+      : `<p class="muted">No saved address yet. Tick “Use as default address” at checkout to save one.</p>`;
+    if (addr) { $("#pName").value = addr.name || ""; $("#pPhone").value = addr.phone || ""; }
+    $("#profForm").onsubmit = (e) => {
+      e.preventDefault();
+      store.set("rj_addr", { ...(store.get("rj_addr", {}) || {}), name: $("#pName").value.trim(), phone: $("#pPhone").value.trim() });
+      toast("Profile saved");
+    };
+
+    show();
+  </script>
+</body>
+</html>

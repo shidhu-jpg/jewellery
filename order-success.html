@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Order Placed | Rajlaxmi Jewellers</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header id="site-header"></header>
+
+  <main class="container narrow" style="max-width:520px">
+    <div class="success" id="success"></div>
+  </main>
+
+  <div id="site-footer"></div>
+
+  <script src="js/data.js"></script>
+  <script src="js/app.js"></script>
+  <script>
+    const orders = store.get("rj_orders", []);
+    const o = orders.find((x) => x.id === qs("id")) || orders[0];
+    $("#success").innerHTML = !o
+      ? `<h1>No recent order found</h1><p>Browse our collections to place an order.</p><br><a href="category.html" class="btn btn-primary">Shop Collection</a>`
+      : `<div class="tick">${icon("check")}</div>
+        <h1>Order Placed Successfully!</h1>
+        <p>Thank you for shopping with ${STORE.name}.<br>Your order has been received and will be processed soon.</p>
+        <div class="order-kv">
+          <div><span>Order ID</span><b>#${o.id}</b></div>
+          <div><span>Order Date</span><b>${fmtDate(o.date)}</b></div>
+          <div><span>Total Amount</span><b>${inr(o.total)}</b></div>
+          <div><span>Payment Method</span><b>${o.method}</b></div>
+          <div><span>Estimated Delivery</span><b>5–7 Business Days</b></div>
+        </div>
+        <a href="account.html#orders" class="btn btn-primary btn-block">Track Your Order</a>
+        <a href="index.html" class="text-link">Continue Shopping</a>`;
+  </script>
+</body>
+</html>

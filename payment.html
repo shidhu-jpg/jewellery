@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Payment | Rajlaxmi Jewellers</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header id="site-header"></header>
+
+  <main class="container narrow" style="max-width:560px">
+    <div id="stepper"></div>
+
+    <h2 class="pay-title">Choose Payment Method</h2>
+    <form id="payForm">
+      <label class="pay-opt"><input type="radio" name="pm" value="UPI" checked> UPI (GPay, PhonePe, Paytm)
+        <span class="logos"><i style="color:#4285f4">G Pay</i><i style="color:#5f259f">PhonePe</i><i style="color:#00baf2">Paytm</i></span></label>
+      <div class="pay-extra"><div class="field"><label for="vpa">UPI ID</label><input id="vpa" placeholder="yourname@upi"></div></div>
+
+      <label class="pay-opt"><input type="radio" name="pm" value="Card"> Credit / Debit Card
+        <span class="logos"><i style="color:#1a1f71">VISA</i><i style="color:#eb001b">MC</i><i style="color:#0b6b3a">RuPay</i></span></label>
+      <div class="pay-extra">
+        <div class="field"><label for="cno">Card Number</label><input id="cno" placeholder="1234 5678 9012 3456" inputmode="numeric" maxlength="19"></div>
+        <div class="row">
+          <div class="field"><label for="cexp">Expiry</label><input id="cexp" placeholder="MM / YY" maxlength="7"></div>
+          <div class="field"><label for="ccvv">CVV</label><input id="ccvv" type="password" placeholder="•••" maxlength="4" inputmode="numeric"></div>
+        </div>
+      </div>
+
+      <label class="pay-opt"><input type="radio" name="pm" value="Net Banking"> Net Banking</label>
+      <div class="pay-extra"><div class="field"><label for="bank">Select Bank</label>
+        <select id="bank"><option>State Bank of India</option><option>HDFC Bank</option><option>ICICI Bank</option><option>Axis Bank</option><option>Kotak Mahindra Bank</option><option>Punjab National Bank</option></select></div></div>
+
+      <label class="pay-opt"><input type="radio" name="pm" value="Cash on Delivery"> Cash on Delivery (COD)</label>
+      <div class="pay-extra"><p class="muted" style="font-size:12.5px">Pay in cash or via UPI when your order is delivered.</p></div>
+
+      <div class="secure-box"><span data-icon="lock"></span><div><b>100% Secure Payment</b><small>Your payment information is safe with us.</small></div></div>
+
+      <button class="btn btn-primary btn-block" id="payBtn" style="margin-bottom:60px"></button>
+    </form>
+  </main>
+
+  <div id="site-footer"></div>
+
+  <script src="js/data.js"></script>
+  <script src="js/app.js"></script>
+  <script>
+    const addr = store.get("rj_checkout_addr", null);
+    if (!Cart.selected().length) location.replace("cart.html");
+    else if (!addr) location.replace("checkout.html");
+
+    $("#stepper").innerHTML = stepper(2);
+    $$("[data-icon]").forEach((s) => (s.outerHTML = icon(s.dataset.icon)));
+    const t = Cart.totals();
+    const method = () => $("input[name=pm]:checked").value;
+    const label = () => (method() === "Cash on Delivery" ? "Place Order" : `Pay ${inr(t.total)}`);
+    $("#payBtn").textContent = label();
+    $("#payForm").addEventListener("change", () => ($("#payBtn").textContent = label()));
+
+    $("#cno").oninput = (e) => (e.target.value = e.target.value.replace(/\D/g, "").slice(0, 16).replace(/(.{4})(?=.)/g, "$1 "));
+    $("#cexp").oninput = (e) => { const v = e.target.value.replace(/\D/g, "").slice(0, 4); e.target.value = v.length > 2 ? v.slice(0, 2) + " / " + v.slice(2) : v; };
+    $("#ccvv").oninput = (e) => (e.target.value = e.target.value.replace(/\D/g, ""));
+
+    $("#payForm").onsubmit = (e) => {
+      e.preventDefault();
+      const m = method();
+      if (m === "UPI" && $("#vpa").value && !/^[\w.-]{2,}@[a-zA-Z]{2,}$/.test($("#vpa").value.trim())) return toast("Enter a valid UPI ID");
+      if (m === "Card") {
+        const [mm, yy] = $("#cexp").value.split(" / ").map(Number);
+        if ($("#cno").value.replace(/\s/g, "").length < 15) return toast("Enter a valid card number");
+        if (!(mm >= 1 && mm <= 12 && yy >= 0)) return toast("Enter a valid expiry date");
+        if ($("#ccvv").value.length < 3) return toast("Enter your CVV");
+      }
+      const btn = $("#payBtn"); btn.disabled = true; btn.textContent = "Processing…";
+      const d = new Date(), pad = (n) => String(n).padStart(2, "0");
+      const order = {
+        id: `RJ${d.getFullYear()}${pad(d.getMonth() + 1)}${pad(d.getDate())}${Math.floor(Math.random() * 900 + 100)}`,
+        date: d.toISOString(),
+        items: Cart.selected().map(({ id, qty, weight, purity }) => ({ id, qty, weight, purity })),
+        total: t.total, method: m === "Card" ? "Card" : m, addr, status: "Processing",
+      };
+      store.set("rj_orders", [order, ...store.get("rj_orders", [])]);
+      setTimeout(() => {
+        Cart.save(Cart.items().filter((i) => i.selected === false)); // keep only items left unticked in the cart
+        location.href = "order-success.html?id=" + order.id;
+      }, 1200);
+    };
+  </script>
+</body>
+</html>

@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Rajlaxmi Jewellers | Timeless Gold &amp; Diamond Jewellery</title>
+  <meta name="description" content="Pure gold, certified diamonds, trusted since 1995. Shop hallmarked necklaces, earrings, bangles and bridal jewellery.">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header id="site-header"></header>
+
+  <main>
+    <section class="hero" style="padding:0">
+      <div class="hero-img"><img src="images/hero.jpg" alt="Gold necklace and earrings set on a display bust"></div>
+      <div class="container">
+        <h1><span>Timeless</span><span class="big">Beauty</span><span>For Every</span><span class="big">Generation</span></h1>
+        <p>Pure Gold <i>•</i> Certified Diamonds <i>•</i> Trusted Since <span id="since"></span></p>
+        <a href="category.html" class="btn btn-gold">Shop Collection <span data-icon="arrow"></span></a>
+      </div>
+    </section>
+
+    <div class="features" id="about">
+      <div class="container">
+        <div><span data-icon="shield"></span>100% Hallmarked</div>
+        <div><span data-icon="shield"></span>Certified Jewellery</div>
+        <div><span data-icon="lock"></span>Secure Payments</div>
+        <div><span data-icon="truck"></span>Home Delivery</div>
+      </div>
+    </div>
+
+    <section>
+      <div class="container">
+        <div class="sec-head">
+          <div><h2>Shop by Category</h2><p>Explore our wide range of exquisite collections</p></div>
+          <a class="link" href="category.html">View All <span data-icon="arrow"></span></a>
+        </div>
+        <div class="cat-grid" id="catGrid"></div>
+      </div>
+    </section>
+
+    <section style="padding-top:0" id="gold-rate">
+      <div class="container">
+        <div class="gold-rate">
+          <img src="images/gold-bars.jpg" alt="" aria-hidden="true">
+          <div>
+            <h3>Today's Gold Rate</h3>
+            <div class="rates" id="rates"></div>
+          </div>
+          <a href="#gold-rate" class="btn btn-primary" id="liveRates">View Live Rates <span data-icon="arrow"></span></a>
+        </div>
+      </div>
+    </section>
+
+    <section style="padding-top:0">
+      <div class="container">
+        <div class="sec-head">
+          <div><h2>Featured Collection</h2><p>Handpicked pieces for every special moment</p></div>
+          <a class="link" href="category.html">View All <span data-icon="arrow"></span></a>
+        </div>
+        <div class="pgrid" id="featured"></div>
+        <div class="dots"><i class="on"></i><i></i><i></i></div>
+      </div>
+    </section>
+
+    <section style="padding-top:0">
+      <div class="container">
+        <div class="bridal">
+          <img src="images/bridal.jpg" alt="Bride wearing traditional gold bridal jewellery">
+          <div class="txt">
+            <h2>Bridal Collection</h2>
+            <p>For Your Special Day</p>
+            <a href="category.html?cat=bridal" class="btn btn-gold">Explore Now <span data-icon="arrow"></span></a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div id="site-footer"></div>
+
+  <script src="js/data.js"></script>
+  <script src="js/app.js"></script>
+  <script>
+    $("#since").textContent = STORE.since;
+    $("#catGrid").innerHTML = CATEGORIES.map((c) =>
+      `<a class="cat-tile" href="category.html?cat=${c.id}"><img src="${c.img}" alt="${c.name}" loading="lazy"><span>${c.name}</span></a>`).join("");
+    const r = STORE.goldRate;
+    $("#rates").innerHTML = [["24K (999)", r.k24, r.change24], ["22K (916)", r.k22, r.change22]].map(([k, v, ch]) =>
+      `<div class="rate"><small>${k}</small><b>${inr(v)} <em>/ gm</em></b><i>${icon("up")} +${ch}%</i></div>`).join("");
+    $("#liveRates").onclick = (e) => { e.preventDefault(); toast(`Rates updated today · 24K ${inr(r.k24)}/gm`); };
+    $("#featured").innerHTML = FEATURED.map((f) => productCard(findProduct(f.id), f)).join("");
+    $$("[data-icon]").forEach((s) => (s.outerHTML = icon(s.dataset.icon)));
+  </script>
+</body>
+</html>

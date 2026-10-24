@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Product | Rajlaxmi Jewellers</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header id="site-header"></header>
+
+  <main class="container" id="pdp"></main>
+
+  <div id="site-footer"></div>
+
+  <script src="js/data.js"></script>
+  <script src="js/app.js"></script>
+  <script>
+    const p = findProduct(qs("id")) || PRODUCTS[0];
+    const c = CATEGORIES.find((x) => x.id === p.cat);
+    const gallery = p.gallery || [p.img];
+    const isGold = /K$/.test(p.material);
+    const weights = p.weights || [p.weight];
+    document.title = `${p.name} | ${STORE.name}`;
+
+    $("#pdp").innerHTML = `
+      <div class="crumbs"><a href="index.html">Home</a> <span>›</span> <a href="category.html?cat=${p.cat}">${c.name}</a> <span>›</span> <b>${p.name}</b></div>
+      <div class="pdp">
+        <div class="gallery">
+          <div class="thumbs">
+            ${gallery.slice(1).concat(gallery.length === 1 ? gallery : []).slice(0, 4).map((src, i) =>
+              `<button data-src="${src}" aria-label="View image ${i + 1}"><img src="${src}" alt=""></button>`).join("")}
+            <button aria-label="360° view" id="view360">${icon("rotate")}</button>
+          </div>
+          <div class="main-img">
+            <img src="${gallery[0]}" alt="${p.name}" id="mainImg">
+            <button class="wish ${Wish.has(p.id) ? "on" : ""}" data-wish="${p.id}" aria-label="Add to wishlist">${icon("heart")}</button>
+          </div>
+        </div>
+
+        <div class="pinfo">
+          ${p.badge ? `<span class="tag">${p.badge}</span>` : ""}
+          <h1>${p.name}</h1>
+          <div class="code">Product Code: ${p.code}</div>
+          <div class="rating">${starRow(p.rating)} ${p.rating} (${p.reviews} reviews)</div>
+          <div class="price-line"><b id="price">${inr(p.price)}</b><span class="stock">In Stock</span></div>
+          <small class="muted">Inclusive of all taxes</small>
+
+          ${isGold ? `<div class="opt"><h4>Purity</h4><div class="chips" id="purity">
+            <button class="chip ${p.material !== "24K" ? "active" : ""}" data-v="22K">22K (916)</button>
+            <button class="chip ${p.material === "24K" ? "active" : ""}" data-v="24K">24K (999)</button></div></div>` : ""}
+
+          <div class="opt"><h4>Weight</h4>
+            <select class="select" id="weight" aria-label="Weight">
+              <option value="">Select Weight</option>
+              ${weights.map((w) => `<option value="${w}">${w} grams</option>`).join("")}
+            </select>
+          </div>
+
+          <div class="buy-grid">
+            <div class="qty"><button id="minus" aria-label="Decrease">−</button><input id="qty" value="1" inputmode="numeric" aria-label="Quantity"><button id="plus" aria-label="Increase">+</button></div>
+            <button class="btn btn-primary" id="addCart">Add to Cart</button>
+            <button class="btn btn-soft" id="buyNow">Buy Now</button>
+          </div>
+
+          <div class="trust-row">
+            <div>${icon("shield")}100% Hallmarked</div>
+            <div>${icon("shield")}Certified Jewellery</div>
+            <div>${icon("returns")}Easy Returns</div>
+            <div>${icon("lock")}Secure Payment</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tabs">
+        <div class="tab-btns">
+          <button class="active" data-t="desc">Description</button>
+          <button data-t="spec">Specifications</button>
+          <button data-t="ship">Shipping</button>
+          <button data-t="rev">Reviews</button>
+        </div>
+        <div class="tab-pane active" id="t-desc">
+          <p>A stunning ${p.name.toLowerCase()} crafted with fine detailing, perfect for weddings and special occasions. This elegant piece reflects timeless beauty and craftsmanship.</p>
+          <ul>
+            <li><b>Purity:</b> ${isGold ? "22K / 24K Hallmarked" : p.material}</li>
+            <li><b>Weight:</b> ${weights.length > 1 ? "Varies (Select above)" : p.weight + " grams"}</li>
+            ${p.includes ? `<li><b>Includes:</b> ${p.includes}</li>` : ""}
+            <li><b>Occasion:</b> ${p.occasion.map((o) => ({ daily: "Daily Wear", wedding: "Wedding", party: "Festive", gift: "Gifting" })[o]).join(", ")}, Special Occasions</li>
+          </ul>
+        </div>
+        <div class="tab-pane" id="t-spec">
+          <table class="spec">
+            <tr><td>Product Code</td><td>${p.code}</td></tr>
+            <tr><td>Material</td><td>${MATERIAL_LABEL[p.material]}</td></tr>
+            <tr><td>Weight</td><td>${weights.join(" / ")} grams</td></tr>
+            <tr><td>Certification</td><td>BIS Hallmark (HUID)</td></tr>
+            <tr><td>Category</td><td>${c.name}</td></tr>
+          </table>
+        </div>
+        <div class="tab-pane" id="t-ship">
+          <ul>
+            <li>Free insured shipping on orders above ₹10,000</li>
+            <li>Dispatched within 2 business days, delivered in 5–7 business days</li>
+            <li>Tamper-proof packaging with certificate of authenticity</li>
+            <li>Easy 7-day returns on unused items with original tags</li>
+          </ul>
+        </div>
+        <div class="tab-pane" id="t-rev">
+          ${[["Priya S.", 5, "Absolutely stunning! The finish is even better than the photos."], ["Anjali K.", 5, "Bought it for my wedding. Beautiful craftsmanship and quick delivery."], ["Rahul M.", 4, "Gifted it to my mother and she loved it. Premium packaging."]]
+            .map(([n, r, t]) => `<div class="review">${starRow(r)} <b style="font-weight:500;margin-left:6px">${n}</b><p class="muted" style="margin-top:4px">${t}</p></div>`).join("")}
+        </div>
+      </div>`;
+
+    let purity = isGold ? (p.material === "24K" ? "24K" : "22K") : null;
+    const qty = $("#qty");
+    $("#minus").onclick = () => (qty.value = Math.max(1, (+qty.value || 1) - 1));
+    $("#plus").onclick = () => (qty.value = Math.min(10, (+qty.value || 1) + 1));
+    $$(".thumbs [data-src]").forEach((b) => b.onclick = () => {
+      $$(".thumbs button").forEach((x) => x.classList.remove("active"));
+      b.classList.add("active"); $("#mainImg").src = b.dataset.src;
+    });
+    $("#view360").onclick = () => toast("360° view coming soon");
+    $("#purity")?.addEventListener("click", (e) => {
+      const b = e.target.closest(".chip"); if (!b) return;
+      $$("#purity .chip").forEach((x) => x.classList.remove("active")); b.classList.add("active"); purity = b.dataset.v;
+    });
+    $$(".tab-btns button").forEach((b) => b.onclick = () => {
+      $$(".tab-btns button, .tab-pane").forEach((x) => x.classList.remove("active"));
+      b.classList.add("active"); $("#t-" + b.dataset.t).classList.add("active");
+    });
+    if (weights.length === 1) $("#weight").value = weights[0];
+    $("#weight").onchange = (e) => ($("#price").textContent = inr(unitPrice(p, +e.target.value)));
+    function addToCart() {
+      const w = +$("#weight").value;
+      if (!w) { $("#weight").focus(); toast("Please select a weight"); return false; }
+      Cart.add(p.id, Math.max(1, +qty.value || 1), { weight: w, purity });
+      return true;
+    }
+    $("#addCart").onclick = addToCart;
+    $("#buyNow").onclick = () => addToCart() && (location.href = "cart.html");
+  </script>
+</body>
+</html>
