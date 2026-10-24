@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Payment | Rajlaxmi Jewellers</title>
+  <title>Payment | Sethi Jewellers</title>
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -75,7 +75,7 @@
       const btn = $("#payBtn"); btn.disabled = true; btn.textContent = "Processing…";
       const d = new Date(), pad = (n) => String(n).padStart(2, "0");
       const order = {
-        id: `RJ${d.getFullYear()}${pad(d.getMonth() + 1)}${pad(d.getDate())}${Math.floor(Math.random() * 900 + 100)}`,
+        id: `SJ${d.getFullYear()}${pad(d.getMonth() + 1)}${pad(d.getDate())}${Math.floor(Math.random() * 900 + 100)}`,
         date: d.toISOString(),
         items: Cart.selected().map(({ id, qty, weight, purity }) => ({ id, qty, weight, purity })),
         total: t.total, method: m === "Card" ? "Card" : m, addr, status: "Processing",

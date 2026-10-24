@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Gold lotus mark on a 108dp adaptive-icon canvas (content kept inside the 66dp safe zone) -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp" android:height="108dp"
+    android:viewportWidth="108" android:viewportHeight="108">
+    <group android:translateX="30" android:translateY="37">
+        <path android:strokeColor="#E9C46A" android:strokeWidth="2" android:strokeLineJoin="round"
+            android:pathData="M24,3c4.5,4 6,9 6,13.5S27.5,25 24,28c-3.5,-3 -6,-7 -6,-11.5S19.5,7 24,3Z" />
+        <path android:strokeColor="#E9C46A" android:strokeWidth="2" android:strokeLineJoin="round"
+            android:pathData="M17.5,11.5C12,11 8.5,13 6,15.5c2,5 7,10 18,12.5" />
+        <path android:strokeColor="#E9C46A" android:strokeWidth="2" android:strokeLineJoin="round"
+            android:pathData="M30.5,11.5C36,11 39.5,13 42,15.5c-2,5 -7,10 -18,12.5" />
+        <path android:strokeColor="#C9A14A" android:strokeWidth="2" android:strokeLineJoin="round"
+            android:pathData="M14,21c-5,0 -9.5,1 -12.5,3 4,4 12,5 22.5,4" />
+        <path android:strokeColor="#C9A14A" android:strokeWidth="2" android:strokeLineJoin="round"
+            android:pathData="M34,21c5,0 9.5,1 12.5,3 -4,4 -12,5 -22.5,4" />
+    </group>
+</vector>

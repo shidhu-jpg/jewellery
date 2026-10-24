@@ -1,0 +1,323 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Sethi Jewellers</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    :root { --wine: #3d0b12; --wine-d: #2a070c; --ticker: #1d0b07; }
+    body { background: var(--cream); padding-bottom: 72px; }
+    .ic { width: 22px; height: 22px; }
+
+    /* Top bar */
+    .topbar { background: radial-gradient(120% 140% at 20% 0%, #5a1019 0%, var(--wine) 55%, var(--wine-d) 100%); color: var(--gold-l); padding: 10px 14px 12px; }
+    .top-row { display: flex; align-items: center; gap: 6px; }
+    .brand { display: flex; align-items: center; gap: 8px; margin-right: auto; }
+    .brand svg { width: 46px; height: 34px; }
+    .brand b { display: block; font: 600 27px/1 var(--display); color: var(--gold-l); letter-spacing: .3px; }
+    .brand small { display: block; font: 500 9.5px/1 var(--sans); letter-spacing: 4px; color: #f3e6cc; margin-top: 4px; }
+    .brand small::before { content: "— "; letter-spacing: 0; }
+    .tb-btn { position: relative; width: 38px; height: 38px; display: grid; place-items: center; color: #fff; background: none; border: 0; }
+    .tb-btn .ic { width: 25px; height: 25px; }
+    .badge { position: absolute; top: 1px; right: 0; min-width: 17px; height: 17px; padding: 0 4px; border-radius: 9px; background: #d4232f; color: #fff; font: 600 10px/17px var(--sans); text-align: center; font-style: normal; border: 1.5px solid var(--wine); }
+    .badge[hidden] { display: none; }
+    .search { display: flex; gap: 8px; margin-top: 10px; }
+    .search[hidden] { display: none; }
+    .search input { flex: 1; min-width: 0; padding: 10px 14px; border-radius: 22px; border: 1px solid var(--gold); background: #fff8ec; color: var(--ink); }
+    .search button { padding: 0 16px; border-radius: 22px; border: 0; background: var(--gold-btn); color: var(--wine); font-weight: 600; }
+    .menu { margin-top: 10px; display: grid; gap: 2px; }
+    .menu[hidden] { display: none; }
+    .menu a { padding: 10px 6px; border-bottom: 1px solid rgba(233,197,111,.18); color: #f6e9cf; }
+
+    /* Live price ticker */
+    .ticker { margin-top: 12px; background: var(--ticker); border: 1.5px solid #b8913f; border-radius: 12px; padding: 10px 12px 10px; }
+    .tk-head { display: flex; align-items: center; gap: 8px; padding-bottom: 8px; border-bottom: 1px solid rgba(201,161,74,.28); }
+    .tk-head h2 { white-space: nowrap; font: 500 14px/1 var(--sans); color: var(--gold-l); letter-spacing: .4px; display: flex; align-items: center; gap: 6px; }
+    .tk-head h2 .ic { width: 18px; height: 18px; }
+    .live { color: #ff4b4b; font: 500 12px/1 var(--sans); display: flex; align-items: center; gap: 4px; }
+    .live::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: #ff3b3b; animation: pulse 1.4s infinite; }
+    @keyframes pulse { 50% { opacity: .25; } }
+    .tk-time { margin-left: auto; font-size: 10px; color: #e8dccb; white-space: nowrap; }
+    .tk-refresh { background: none; border: 0; color: #fff; width: 26px; height: 26px; display: grid; place-items: center; }
+    .tk-refresh .ic { width: 17px; height: 17px; transition: transform .6s; }
+    .tk-refresh.spin .ic { transform: rotate(360deg); }
+    .tk-rates { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); padding-top: 9px; }
+    .tk-rate { display: flex; align-items: center; gap: 6px; padding: 0 4px; min-width: 0; }
+    .tk-rate + .tk-rate { border-left: 1px solid rgba(201,161,74,.28); padding-left: 8px; }
+    .tk-rate svg { width: 28px; height: 22px; flex: none; }
+    .tk-rate small { display: block; color: #f3e9da; font-size: 11px; }
+    .tk-rate b { display: block; color: #fff; font: 600 13.5px/1.2 var(--sans); white-space: nowrap; }
+    .tk-rate b em { font-style: normal; font-weight: 500; font-size: 11px; }
+    .tk-rate i { display: flex; align-items: center; color: #3ccf6e; font: 500 11px/1.3 var(--sans); font-style: normal; }
+    .tk-rate i::before { content: ""; border: 5px solid transparent; border-bottom: 7px solid #3ccf6e; border-top: 0; margin-right: 4px; }
+
+    /* Carousels */
+    .slider { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; }
+    .slider::-webkit-scrollbar { display: none; }
+    .slider > * { flex: 0 0 100%; scroll-snap-align: start; }
+    .dots { display: flex; justify-content: center; gap: 6px; }
+    .dots i { width: 7px; height: 7px; border-radius: 50%; background: rgba(255,255,255,.45); transition: background .2s; }
+    .dots i.on { background: #fff; }
+
+    /* Hero */
+    .hero-wrap { position: relative; }
+    .slide { position: relative; height: 340px; overflow: hidden; background: #3a1a10; }
+    .slide img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: left center; }
+    .slide::after { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, rgba(40,14,6,0) 18%, rgba(40,14,6,.55) 52%, rgba(30,10,4,.85) 100%); }
+    .slide .txt { position: absolute; z-index: 1; right: 16px; top: 50%; transform: translateY(-50%); width: 58%; text-align: left; }
+    .slide h1 { font: 600 44px/0.98 var(--display); color: var(--gold-l); text-shadow: 0 2px 10px rgba(0,0,0,.45); }
+    .slide p { font: 500 17px/1.25 var(--display); color: #fbefdc; margin: 10px 0 16px; }
+    .pill { display: inline-flex; align-items: center; gap: 8px; padding: 11px 20px; border-radius: 30px; background: linear-gradient(180deg, #f6dc9c, #e2b961); color: var(--wine); font: 600 14px/1 var(--sans); box-shadow: 0 4px 12px rgba(0,0,0,.25); }
+    .pill .ic { width: 17px; height: 17px; }
+    .hero-wrap .dots { position: absolute; left: 0; right: 0; bottom: 12px; }
+
+    /* Category circles */
+    .cats { display: flex; gap: 6px; overflow-x: auto; padding: 16px 12px 6px; scrollbar-width: none; }
+    .cats::-webkit-scrollbar { display: none; }
+    .cat { flex: 0 0 76px; text-align: center; font-size: 12px; line-height: 1.25; color: var(--ink); }
+    .cat span { display: block; width: 68px; height: 68px; margin: 0 auto 6px; border-radius: 50%; overflow: hidden; background: var(--gold-soft); box-shadow: inset 0 0 0 2px #f1e1bf; }
+    .cat img { width: 100%; height: 100%; object-fit: cover; }
+
+    /* Offer banner */
+    .offer-wrap { position: relative; margin: 12px 14px 0; border-radius: 14px; overflow: hidden; box-shadow: var(--shadow); }
+    .offer { position: relative; height: 150px; background: #5b0f18; }
+    .offer img { position: absolute; right: 0; top: 0; height: 100%; width: 62%; object-fit: cover; }
+    .offer::after { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, #5b0f18 38%, rgba(91,15,24,.75) 52%, rgba(91,15,24,0) 75%); }
+    .offer .txt { position: absolute; z-index: 1; left: 18px; top: 50%; transform: translateY(-50%); color: #f6e3bb; }
+    .offer small { display: block; font: 500 16px/1.1 var(--display); }
+    .offer h3 { font: 600 30px/1.05 var(--display); color: var(--gold-l); }
+    .offer p { font: 500 17px/1.15 var(--display); margin: 4px 0 10px; }
+    .offer p span { display: block; font-size: 14px; }
+    .offer .pill { padding: 8px 16px; font-size: 12.5px; }
+    .offer-wrap .dots { position: absolute; bottom: 7px; left: 0; right: 0; }
+
+    /* Featured */
+    .sec-h { display: flex; align-items: baseline; justify-content: space-between; padding: 22px 14px 10px; }
+    .sec-h h2 { font: 600 26px/1 var(--display); color: var(--ink); }
+    .sec-h a { display: flex; align-items: center; gap: 4px; color: #a8761f; font-size: 13.5px; font-weight: 500; }
+    .sec-h a .ic { width: 16px; height: 16px; }
+    .feat { display: flex; gap: 10px; overflow-x: auto; padding: 0 14px 6px; scroll-padding: 0 14px; scroll-snap-type: x mandatory; scrollbar-width: none; }
+    .feat::-webkit-scrollbar { display: none; }
+    .fcard { position: relative; flex: 0 0 44%; scroll-snap-align: start; background: #fff; border-radius: 10px; overflow: hidden; box-shadow: 0 2px 10px rgba(79,13,21,.08); display: flex; flex-direction: column; }
+    .fcard > a { position: relative; display: block; padding-bottom: 90%; background: #2b1a14; }
+    .fcard > a img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+    .fcard .wish { position: absolute; top: 8px; right: 8px; width: 30px; height: 30px; display: grid; place-items: center; border: 0; background: none; color: #fff; filter: drop-shadow(0 1px 2px rgba(0,0,0,.6)); }
+    .fcard .wish.on { color: #e23b4a; }
+    .fcard .wish.on svg { fill: currentColor; }
+    .fbody { padding: 9px 10px 10px; display: flex; flex-direction: column; flex: 1; }
+    .fbody .nm { font-size: 13px; line-height: 1.3; min-height: 34px; color: var(--ink); }
+    .fbody b { font: 600 15px/1.2 var(--sans); margin: 4px 0 9px; color: var(--ink); }
+    .add { margin-top: auto; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 8px 0; border: 1.3px solid #8b1c28; border-radius: 6px; background: #fff; color: #6d1620; font: 500 12.5px/1 var(--sans); }
+    .add .ic { width: 18px; height: 18px; }
+    .add:active { background: var(--gold-soft); }
+
+    /* Trust strip */
+    .trust { display: grid; grid-template-columns: 1fr 1fr; gap: 14px 10px; padding: 20px 14px 18px; }
+    .trust div { display: flex; align-items: center; gap: 10px; font-size: 12px; line-height: 1.35; color: var(--ink); }
+    .trust span { flex: none; width: 42px; height: 42px; border-radius: 50%; background: var(--gold-soft); display: grid; place-items: center; color: #8b1c28; }
+
+    /* Bottom nav */
+    .bnav { position: fixed; left: 0; right: 0; bottom: 0; z-index: 20; display: grid; grid-template-columns: repeat(5, 1fr); background: var(--wine-d); padding: 8px 0 7px; box-shadow: 0 -4px 14px rgba(0,0,0,.18); }
+    .bnav a { display: flex; flex-direction: column; align-items: center; gap: 3px; color: #f2e6d6; font-size: 11.5px; }
+    .bnav a .ic { width: 25px; height: 25px; }
+    .bnav a.on { color: #f1b85a; }
+    .bnav a.on svg { fill: currentColor; }
+
+    @media (max-width: 370px) {
+      .slide h1 { font-size: 37px; }
+      .tk-rate b { font-size: 12.5px; }
+      .tk-rate svg { display: none; }
+      .brand b { font-size: 23px; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="top-row">
+      <a href="app.html" class="brand" aria-label="Sethi Jewellers home">
+        <svg viewBox="0 0 48 34" aria-hidden="true">
+          <defs><linearGradient id="lt" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f3d78e"/><stop offset="1" stop-color="#b78a33"/></linearGradient></defs>
+          <g fill="none" stroke="url(#lt)" stroke-width="1.7" stroke-linejoin="round">
+            <path d="M24 3c4.5 4 6 9 6 13.5S27.5 25 24 28c-3.5-3-6-7-6-11.5S19.5 7 24 3Z"/>
+            <path d="M17.5 11.5C12 11 8.5 13 6 15.5c2 5 7 10 18 12.5"/>
+            <path d="M30.5 11.5C36 11 39.5 13 42 15.5c-2 5-7 10-18 12.5"/>
+            <path d="M14 21c-5 0-9.5 1-12.5 3 4 4 12 5 22.5 4"/>
+            <path d="M34 21c5 0 9.5 1 12.5 3-4 4-12 5-22.5 4"/>
+          </g>
+        </svg>
+        <span><b>Sethi</b><small>JEWELLERS</small></span>
+      </a>
+      <button class="tb-btn" id="searchBtn" aria-label="Search"><span data-icon="search"></span></button>
+      <a class="tb-btn" href="account.html#wishlist" aria-label="Wishlist"><span data-icon="heart"></span><i class="badge" id="wishCount" hidden></i></a>
+      <a class="tb-btn" href="cart.html" aria-label="Cart"><span data-icon="cart"></span><i class="badge cart-count" hidden></i></a>
+      <button class="tb-btn" id="menuBtn" aria-label="Menu"><span data-icon="menu"></span></button>
+    </div>
+    <form class="search" action="category.html" hidden>
+      <input name="q" placeholder="Search necklaces, earrings, bangles..." aria-label="Search products">
+      <button>Search</button>
+    </form>
+    <nav class="menu" hidden>
+      <a href="category.html">All Collections</a>
+      <a href="category.html?cat=bridal">Bridal Collection</a>
+      <a href="account.html">My Account &amp; Orders</a>
+      <a href="tel:+919876543210">Call Store</a>
+    </nav>
+
+    <section class="ticker" id="rates">
+      <div class="tk-head">
+        <h2><span data-icon="bars"></span>LIVE GOLD PRICE</h2>
+        <span class="live">LIVE</span>
+        <span class="tk-time" id="updated"></span>
+        <button class="tk-refresh" id="refresh" aria-label="Refresh rates"><span data-icon="rotate"></span></button>
+      </div>
+      <div class="tk-rates" id="rateList"></div>
+    </section>
+  </header>
+
+  <main>
+    <div class="hero-wrap">
+      <div class="slider" id="hero">
+        <div class="slide"><img src="images/hero.jpg" alt="Gold necklace and earrings set">
+          <div class="txt"><h1>Timeless Traditions</h1><p>Exquisite Jewellery for Life's Precious Moments</p>
+            <a href="category.html" class="pill">Explore Collection <span data-icon="arrow"></span></a></div></div>
+        <div class="slide"><img src="images/bridal.jpg" alt="Bride wearing traditional gold jewellery">
+          <div class="txt"><h1>Bridal Elegance</h1><p>Heirloom Sets for Your Special Day</p>
+            <a href="category.html?cat=bridal" class="pill">Shop Bridal <span data-icon="arrow"></span></a></div></div>
+        <div class="slide"><img src="images/pdp-main.jpg" alt="Traditional gold necklace set">
+          <div class="txt"><h1>Pure 22K Gold</h1><p>BIS Hallmarked, Crafted Since 1995</p>
+            <a href="category.html?cat=gold" class="pill">Shop Gold <span data-icon="arrow"></span></a></div></div>
+        <div class="slide"><img src="images/feat-diamond-ring.jpg" alt="Diamond ring">
+          <div class="txt"><h1>Certified Diamonds</h1><p>Brilliance That Lasts Forever</p>
+            <a href="category.html?cat=diamond" class="pill">Shop Diamonds <span data-icon="arrow"></span></a></div></div>
+      </div>
+      <div class="dots" data-for="hero"></div>
+    </div>
+
+    <nav class="cats" id="cats"></nav>
+
+    <div class="offer-wrap">
+      <div class="slider" id="offers">
+        <div class="offer"><img src="images/feat-bangles.jpg" alt="Gold bangles">
+          <div class="txt"><small>Festive Season</small><h3>Special Offer</h3><p>FLAT 10% OFF <span>on Making Charges</span></p>
+            <a href="category.html?cat=gold" class="pill">Shop Now <span data-icon="arrow"></span></a></div></div>
+        <div class="offer"><img src="images/feat-bridal-set.jpg" alt="Bridal necklace set">
+          <div class="txt"><small>Wedding Season</small><h3>Bridal Sets</h3><p>Free Gift Box <span>on Every Bridal Order</span></p>
+            <a href="category.html?cat=bridal" class="pill">Shop Now <span data-icon="arrow"></span></a></div></div>
+        <div class="offer"><img src="images/cat-gifts.jpg" alt="Gift sets">
+          <div class="txt"><small>Gifting Made Easy</small><h3>Gift Sets</h3><p>Starting ₹24,000 <span>with Free Engraving</span></p>
+            <a href="category.html?cat=gifts" class="pill">Shop Now <span data-icon="arrow"></span></a></div></div>
+      </div>
+      <div class="dots" data-for="offers"></div>
+    </div>
+
+    <div class="sec-h"><h2>Featured Collection</h2><a href="category.html">View All <span data-icon="arrow"></span></a></div>
+    <div class="feat" id="featured"></div>
+
+    <div class="trust">
+      <div><span><i data-icon="truck"></i></span>Free &amp; Insured<br>Shipping</div>
+      <div><span><i data-icon="shield"></i></span>Certified<br>Hallmarked Jewellery</div>
+      <div><span><i data-icon="seal"></i></span>Secure<br>Payments</div>
+      <div><span><i data-icon="gift"></i></span>Easy Returns<br>7 Days Policy</div>
+    </div>
+  </main>
+
+  <nav class="bnav">
+    <a href="app.html" class="on"><span data-icon="home"></span>Home</a>
+    <a href="category.html"><span data-icon="grid"></span>Categories</a>
+    <a href="#rates" id="navRates"><span data-icon="pulse"></span>Live Rates</a>
+    <a href="account.html#wishlist"><span data-icon="heart"></span>Wishlist</a>
+    <a href="account.html"><span data-icon="user"></span>Account</a>
+  </nav>
+
+  <script src="js/data.js"></script>
+  <script src="js/app.js"></script>
+  <script>
+    Object.assign(I, {
+      bars: '<path d="M5 20v-6M10 20V9M15 20v-8M20 20V5"/>',
+      grid: '<rect x="4" y="4" width="6.5" height="6.5" rx="1.5"/><rect x="13.5" y="4" width="6.5" height="6.5" rx="1.5"/><rect x="4" y="13.5" width="6.5" height="6.5" rx="1.5"/><rect x="13.5" y="13.5" width="6.5" height="6.5" rx="1.5"/>',
+      pulse: '<path d="M12 3v10"/><path d="M7 9v4M17 9v4"/><path d="M3 20h18"/><path d="M5 13a7 7 0 0 0 14 0"/>',
+      seal: '<path d="M12 3l2.2 1.6 2.7-.2.9 2.6 2.3 1.4-.8 2.6.8 2.6-2.3 1.4-.9 2.6-2.7-.2L12 19l-2.2-1.6-2.7.2-.9-2.6-2.3-1.4.8-2.6-.8-2.6 2.3-1.4.9-2.6 2.7.2Z"/><path d="m9 11.5 2 2 4-4"/>',
+      gift: '<rect x="4" y="9" width="16" height="11" rx="1"/><path d="M3 9h18M12 9v11"/><path d="M12 9c-2-4-6-4-6-1.5S10 9 12 9Zm0 0c2-4 6-4 6-1.5S14 9 12 9Z"/>',
+    });
+
+    /* Bullion icons for the ticker (gold / silver) */
+    const bar = (a, b, id) => `<svg viewBox="0 0 34 26" aria-hidden="true"><defs><linearGradient id="${id}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${a}"/><stop offset="1" stop-color="${b}"/></linearGradient></defs>
+      <path d="M3 21l4-8h13l-4 8Z" fill="url(#${id})"/><path d="M16 21l4-8 3 0-4 8Z" fill="${b}" opacity=".8"/>
+      <path d="M12 13l4-8h13l-4 8Z" fill="url(#${id})"/><path d="M25 13l4-8 3 2-4 6Z" fill="${b}" opacity=".8"/>
+      <path d="M13 22l3-6h13l-3 6Z" fill="url(#${id})" stroke="${b}" stroke-width=".4"/></svg>`;
+
+    const r = STORE.goldRate;
+    const perGm = (n) => "₹" + n.toLocaleString("en-IN", { minimumFractionDigits: n % 1 ? 2 : 0 });
+    $("#rateList").innerHTML = [
+      ["24K Gold", r.k24, r.change24, bar("#ffe7a0", "#c48a1c", "g1")],
+      ["22K Gold", r.k22, r.change22, bar("#ffe39a", "#b98018", "g2")],
+      ["Silver", r.silver, r.changeSilver, bar("#ffffff", "#9aa0a8", "g3")],
+    ].map(([k, v, ch, svg]) => `<div class="tk-rate">${svg}<div><small>${k}</small><b>${perGm(v)} <em>/gm</em></b><i>+${ch}%</i></div></div>`).join("");
+
+    const stamp = () => {
+      const d = new Date();
+      $("#updated").textContent = "Updated: " + d.toLocaleDateString("en-GB", { day: "numeric", month: "short" }) +
+        ", " + d.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
+    };
+    stamp();
+    $("#refresh").onclick = (e) => {
+      const b = e.currentTarget; b.classList.remove("spin"); void b.offsetWidth; b.classList.add("spin");
+      stamp(); toast("Rates refreshed");
+    };
+
+    const CATS = [
+      ["Gold<br>Jewellery", "images/cat-gold.jpg", "category.html?cat=gold"],
+      ["Diamond<br>Jewellery", "images/cat-diamond.jpg", "category.html?cat=diamond"],
+      ["Earrings", "images/p-jhumka.jpg", "category.html?q=earrings"],
+      ["Bangles", "images/p-bangles-set.jpg", "category.html?q=bangle"],
+      ["Mangalsutra", "images/p-mangalsutra.jpg", "category.html?q=mangalsutra"],
+      ["Rings", "images/feat-diamond-ring.jpg", "category.html?q=ring"],
+      ["Gift Sets", "images/cat-gifts.jpg", "category.html?cat=gifts"],
+    ];
+    $("#cats").innerHTML = CATS.map(([n, img, href]) => `<a class="cat" href="${href}"><span><img src="${img}" alt=""></span>${n}</a>`).join("");
+
+    const FEAT = [
+      { id: 1, name: "Traditional Gold Necklace Set", img: "images/feat-necklace.jpg" },
+      { id: 10 },
+      { id: 3, name: "Gold Bangles Set", img: "images/feat-bangles.jpg" },
+      { id: 8 },
+      { id: 11 },
+      { id: 5 },
+    ];
+    $("#featured").innerHTML = FEAT.map((f) => {
+      const p = findProduct(f.id);
+      return `<article class="fcard">
+        <a href="product.html?id=${p.id}"><img src="${f.img || p.card || p.img}" alt="${f.name || p.name}" loading="lazy"></a>
+        <button class="wish ${Wish.has(p.id) ? "on" : ""}" data-wish="${p.id}" aria-label="Add to wishlist">${icon("heart")}</button>
+        <div class="fbody"><a class="nm" href="product.html?id=${p.id}">${f.name || p.name}</a><b>${inr(p.price)}</b>
+          <button class="add" data-add="${p.id}">${icon("cart")}Add to Cart</button></div>
+      </article>`;
+    }).join("");
+
+    $$("[data-icon]").forEach((s) => (s.outerHTML = icon(s.dataset.icon)));
+
+    const updateWish = () => { const n = Wish.ids().length, b = $("#wishCount"); b.textContent = n; b.hidden = !n; };
+    updateWish(); updateBadges();
+    document.addEventListener("click", (e) => {
+      if (e.target.closest("[data-wish]")) setTimeout(updateWish);
+      const a = e.target.closest("[data-add]");
+      if (a) Cart.add(Number(a.dataset.add));
+    });
+
+    $("#searchBtn").onclick = () => { const f = $(".search"); f.hidden = !f.hidden; $(".menu").hidden = true; if (!f.hidden) f.q.focus(); };
+    $("#menuBtn").onclick = () => { const m = $(".menu"); m.hidden = !m.hidden; $(".search").hidden = true; };
+    $("#navRates").onclick = (e) => { e.preventDefault(); scrollTo({ top: 0, behavior: "smooth" }); $("#refresh").click(); };
+
+    /* Carousels: dots follow scroll position, auto-advance every 4s */
+    $$(".dots[data-for]").forEach((dots) => {
+      const s = $("#" + dots.dataset.for), n = s.children.length;
+      dots.innerHTML = "<i></i>".repeat(n);
+      const cur = () => Math.round(s.scrollLeft / s.clientWidth);
+      const mark = () => $$("i", dots).forEach((d, i) => d.classList.toggle("on", i === cur()));
+      s.addEventListener("scroll", mark, { passive: true }); mark();
+      setInterval(() => s.scrollTo({ left: ((cur() + 1) % n) * s.clientWidth, behavior: "smooth" }), 4000);
+    });
+  </script>
+</body>
+</html>

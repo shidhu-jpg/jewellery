@@ -45,7 +45,7 @@ const logoMark = `<svg class="logo-mark" viewBox="0 0 40 40" aria-hidden="true">
   <path d="M6 18h28l-2 4H8l-2-4Z" fill="url(#lg)"/><path d="M9 23h22v10H9z" fill="none" stroke="url(#lg)" stroke-width="2"/>
   <path d="M13 33v-6a2 2 0 0 1 4 0v6M23 33v-6a2 2 0 0 1 4 0v6" fill="none" stroke="url(#lg)" stroke-width="1.6"/><path d="M5 35h30" stroke="url(#lg)" stroke-width="2"/>
 </svg>`;
-const logo = () => `<a href="index.html" class="logo" aria-label="${STORE.name} home">${logoMark}<span><b>Rajlaxmi</b><small>JEWELLERS</small></span></a>`;
+const logo = () => `<a href="index.html" class="logo" aria-label="${STORE.name} home">${logoMark}<span><b>Sethi</b><small>JEWELLERS</small></span></a>`;
 
 /* ---------- Cart & wishlist ---------- */
 /* Price scales with the chosen weight (base price is for the product's default weight) */
